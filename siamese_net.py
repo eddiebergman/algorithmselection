@@ -4,6 +4,17 @@ from math import comb
 seed = 42
 torch.manual_seed(seed)
 
+# TODO: Get i'th pair in lexographical order
+#   Currently __getitem__ relies on the entire
+#   set of possible pairs being generated which
+#   is very memory inefficient.
+#
+#   Given i, how to calculate a, b such that (s_a, s_b)
+#   is the i'th possible pair when all pairs are sorted lexographically
+#
+#   Example of lexographical sort:
+#   [0,1,2,3] = [(0,1), (0,2), (0,3), (1, 2), (1,3), (2,3)]
+#
 class SiameseTrainingPairs(Dataset):
     """
     Takes `samples` and `labels` to convert it to a dataset
