@@ -70,10 +70,17 @@ class SiameseTrainingPairs(Dataset):
 
         Returns
         =======
-        (s_a, s_b, similarity_ab) | (sample, sample, float)
-            where s_a, s_b are samples and similarity_ab is the similarity
+        (s_i, s_j, similarity_ab) | (sample, sample, float)
+            where s_i, s_j are samples and similarity_ij is the similarity
             between them as specified by similarity_func.
         """
+        i, j = self.pairs[i]
+        s = self.samples
+        m = self.info
+
+        similarity = self.similarity_func((s[i], m[i]), (s[j], m[j]))
+        return (s[i], s[j], similarity)
+
 
 
 
