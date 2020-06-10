@@ -4,7 +4,7 @@ from math import comb
 seed = 42
 torch.manual_seed(seed)
 
-# TODO: Get i'th pair in lexographical order
+# TODO 3c388fe: Get i'th pair in lexographical order
 #   Currently __getitem__ relies on the entire
 #   set of possible pairs being generated which
 #   is very memory inefficient.
@@ -42,15 +42,23 @@ class SiameseTrainingPairs(Dataset):
             Not strictly necessary but similarity_func is treated as a function
             commutative in its arguments.
         """
+        self.samples = samples
+        self.sample_info = sample_info
+        self.similarity_func = similarity_func
+
+        # TODO 3c388fe
+        indicies = range(0, len(samples))
+        self.pairs = list(itertools.combinations(indicies, 2))
 
     def __len__(self):
-        """ 
+        """
         Returns
         =======
         int
             The amount of unique pairs possible `n_samples nCr 2`
         """
-        return comb(len(self.samples), 2)
+        # TODO 3c388fe
+        return len(self.pairs)
 
     def __getitem__(self, idx):
         """
