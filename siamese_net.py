@@ -1,4 +1,6 @@
 import torch
+import itertools
+from torch.utils.data import Dataset
 from math import comb
 
 seed = 42
@@ -32,7 +34,7 @@ class SiameseTrainingPairs(Dataset):
             The labels that indicate which samples
             should be considered similar.
 
-        similarity_func | callable( (s_a, m_a), (s_b, m_b) )
+        similarity_func | callable( s_a, m_a, s_b, m_b )
             A function that given two tuples (s_a, m_a), (s_b, m_b),
             returns a similarity score between them.
 
@@ -78,10 +80,5 @@ class SiameseTrainingPairs(Dataset):
         s = self.samples
         m = self.info
 
-        similarity = self.similarity_func((s[i], m[i]), (s[j], m[j]))
+        similarity = self.similarity_func(s[i], m[i], s[j], m[j])
         return (s[i], s[j], similarity)
-
-
-
-
-
