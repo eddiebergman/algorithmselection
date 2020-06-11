@@ -76,9 +76,9 @@ class SiameseTrainingPairs(Dataset):
             where s_i, s_j are samples and similarity_ij is the similarity
             between them as specified by similarity_func.
         """
-        i, j = self.pairs[i]
+        i, j = self.pairs[idx]
         s = self.samples
-        m = self.info
+        m = self.sample_info
 
         similarity = self.similarity_func(s[i], m[i], s[j], m[j])
         return (s[i], s[j], similarity)
