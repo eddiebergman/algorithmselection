@@ -24,13 +24,12 @@ class ContrastiveLoss(Module):
         """
         Params
         ======
-        margin | float
+        margin | float >= 0
             A margin that dictates how far away negative samples should be
 
         p | float
         """
         super(ContrastiveLoss, self).__init__()
-        self.dist_f = PairwiseDistance(p=1)
         self.margin = margin
 
     def forward(self, lefts, rights, similarities):
@@ -50,16 +49,21 @@ class ContrastiveLoss(Module):
         right | tensor (n_batch, n_features)
             A 'right' sample
 
-        similarities | tensor [0, 1]
+        similarities | tensor[xs] (n_batch) : x in xs, x in [0, 1]
             The similarities between pairs (left, right) where
                 0 - Fully similar
                 1 - Fully disimilar
         """
-        dist = self.dist_f(left, right)
-        return torch.mean(
-            (1-similarity) * torch.pow(dist, 2)
-          + (similarity) * torch.pow(torch.clamp(self.margin - dist, min=0.0),2)
-        )
+        dist_f = PairwiseDistance(eps=1e-09)
+        distances = dist_f(lefts, rights)
+
+        # Does Torch have computation graphs? Would splitting out effect this?
+        loss_1 = (1-similarities) * torch.pow(distances, 2)
+        loss_2 = similarities * torch.pow(torch.clamp(self.margin - distances,
+                                                      min=0.0), 2)
+        losses = loss_1 + loss_2
+        #print(f'\n\t{similarities=}\n\t{distances=}\n\t{loss_1=}\n\t{loss_2=}\n\t{losses=}')
+        return torch.mean(losses)
 
 # TODO 3c388fe: Get i'th pair in lexographical order
 #   Currently __getitem__ relies on the entire
