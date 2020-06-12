@@ -1,10 +1,54 @@
 import torch
 import itertools
+from torch.nn import Module, ParameterList, Linear, PairwiseDistance
+from torch.nn.functional import leaky_relu
+from torch.optim import SGD
 from torch.utils.data import Dataset
 from math import comb
 
 seed = 42
 torch.manual_seed(seed)
+
+class ContrastiveLoss(Module):
+    # https://gist.github.com/harveyslash/725fcc68df112980328951b3426c0e0b#file-contrastive-loss-py
+    """
+    Contrastive loss function.
+    Based on: http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf
+    """
+
+    def __init__(self, margin=2.0):
+        """
+        Params
+        ======
+        margin | float
+            A margin that dictates how far away negative samples should be
+
+        p | float
+        """
+        super(ContrastiveLoss, self).__init__()
+        self.dist_f = PairwiseDistance(p=1)
+        self.margin = margin
+
+    def forward(self, left, right, similarity):
+        """
+        Params
+        ======
+        left | tensor (n_features)
+            A 'left' sample
+
+        right | tensor (n_features)
+            A 'right' sample
+
+        similarity | [0, 1]
+            The similarity between 'left' and 'right' where
+                0 - Fully similar
+                1 - Fully disimilar
+        """
+        dist = self.dist_f(left, right)
+        return torch.mean(
+            (1-similarity) * torch.pow(dist, 2)
+          + (similarity) * torch.pow(torch.clamp(self.margin - dist, min=0.0),2)
+        )
 
 # TODO 3c388fe: Get i'th pair in lexographical order
 #   Currently __getitem__ relies on the entire
@@ -27,10 +71,10 @@ class SiameseTrainingPairs(Dataset):
         """
         Params
         ======
-        samples | torch.tensor (n_samples, n_features)
+        samples | tensor (n_samples, n_features)
             The samples that the SNN will train on.
 
-        sample_info | torch.tensor (n_samples, n_label_length)
+        sample_info | tensor (n_samples, n_label_length)
             The labels that indicate which samples
             should be considered similar.
 
