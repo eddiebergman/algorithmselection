@@ -12,7 +12,11 @@ torch.manual_seed(seed)
 class ContrastiveLoss(Module):
     # https://gist.github.com/harveyslash/725fcc68df112980328951b3426c0e0b#file-contrastive-loss-py
     """
-    Contrastive loss function.
+    Contrastive loss function. Relies on using a similarity between a pair
+    of samples (left, right) where
+                similarity(left, right) -> 0 => Fully similar
+                similarity(left, right) -> 1 => Fully disimilar
+
     Based on: http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf
     """
 
@@ -29,18 +33,25 @@ class ContrastiveLoss(Module):
         self.dist_f = PairwiseDistance(p=1)
         self.margin = margin
 
-    def forward(self, left, right, similarity):
+    def forward(self, lefts, rights, similarities):
         """
+        Calculates the contrastive loss between pairs of (left, right)
+        samples using the similarity as the label.
+
+        Note:
+            similarity is a measure such that
+                similarity(left, right) -> 0 => Fully similar
+                similarity(left, right) -> 1 => Fully disimilar
         Params
         ======
-        left | tensor (n_features)
+        lefts | tensor (n_batch, n_features)
             A 'left' sample
 
-        right | tensor (n_features)
+        right | tensor (n_batch, n_features)
             A 'right' sample
 
-        similarity | [0, 1]
-            The similarity between 'left' and 'right' where
+        similarities | tensor [0, 1]
+            The similarities between pairs (left, right) where
                 0 - Fully similar
                 1 - Fully disimilar
         """
