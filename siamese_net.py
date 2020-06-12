@@ -2,7 +2,7 @@ import torch
 import itertools
 from torch.nn import Module, ParameterList, Linear, PairwiseDistance
 from torch.nn.functional import leaky_relu
-from torch.optim import SGD
+from torch.optim import Adam
 from torch.utils.data import Dataset
 from math import comb
 
@@ -137,3 +137,98 @@ class SiameseTrainingPairs(Dataset):
 
         similarity = self.similarity_func(s[i], m[i], s[j], m[j])
         return (s[i], s[j], similarity)
+
+class SiameseNet(Module):
+    """
+    Trains a fixed architecture Siamese Neural Network to cluster instances
+    in feature space that are considered similar.
+    """
+
+    def __init__(self, layers):
+        """
+        init
+        """
+        # TODO doc test
+        super(Net, self).__init__()
+        self.layers = ParameterList(layers)
+
+    def forward(self, x):
+        """
+        Gets the embedding of sample x
+
+        Params
+        ======
+        x | tensor (n_features)
+            The sample to embed
+
+        Returns
+        =======
+        tensor (size_last_layer)
+            The embedding of sample `x`
+        """
+        for layer in self.layers:
+            x = layer(x)
+        return x
+
+    def train(self, samples=None, samples_info=None, similarity_f=None, epochs=3,
+              batch_size=128, dataset=None):
+        """
+        Trains the Siamese Neural Network (Snn)
+
+        Params
+        ======
+        samples | tensor (n_samples, n_features)
+            The samples the Snn will use to train its embedding from feature
+            to embeddings space.
+
+        samples_info | iterable (n_samples)
+            Any additional meta information for each sample that factors into
+            a similarity function.
+
+        similarity_f | callable : s_a, m_a, s_b, m_b -> float
+            A similarity function that takes both two samples, s_a and s_b
+            along with any meta information m_a and m_b that will return a
+            similarity to scale training. The model is trained to approximate
+            this function by the distance in it's embeddings of s_a, s_b.
+
+        epochs | int
+            How many times to go through the datset.
+
+        batch_size | int
+            The amount of pairs to pass through the network before applying
+            the learning gradient.
+
+        dataset | torch.Dataset
+            Provide a dataset to load from.
+        """
+        params = [samples, samples_info, similarity_f]
+        assert all([p is not None for p in params]) or dataloader is not None, \
+            f'Please specifiy each param `sample`, `samples_info`, `similarity_f`'
+
+        if dataset is None:
+            dataset = SiameseTrainingPairs(samples, sample_info, similarity_f)
+
+        dataloader = DataLoader(dataset, batch_size=batch_size)
+
+        criterion = ContrastiveLoss()
+        optimizer = Adam(net.parameteres(), lr=0.005)
+
+        for epoch in range(0, epochs):
+            print(f'{epoch=}')
+            epoch_loss = 0.0
+
+            for batch, (lefts, rights, similarities) in enumerate(dataloader):
+                print(f'\t{batch=}')
+                optimizer.zero_grad()
+                loss = criterion(lefts, rights, similarities)
+                loss.backward()
+                optimizer.step()
+
+                epoch_loss += loss.item()
+
+            print(f'{epoch_loss=}')
+
+        print('finished')
+
+
+
