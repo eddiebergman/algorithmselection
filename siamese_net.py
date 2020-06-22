@@ -32,6 +32,9 @@ class ContrastiveLoss(Module):
         super(ContrastiveLoss, self).__init__()
         self.margin = margin
 
+        if margin < 0: 
+            raise ValueError(f'{margin=}\n margin should be > 0')
+
     def forward(self, lefts, rights, similarities):
         """
         Calculates the contrastive loss between pairs of (left, right)

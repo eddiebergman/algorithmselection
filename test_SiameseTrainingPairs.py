@@ -1,6 +1,4 @@
-import torch
 import pytest
-from itertools import combinations
 
 """
 TEST 138757229: SiameseTrainingPairs
@@ -14,7 +12,7 @@ TEST 138757229: SiameseTrainingPairs
    Also checked is that the similarity function works across them.
 """
 from .siamese_net import SiameseTrainingPairs
-
+from itertools import combinations
 class TestSiameseTrainingPairs:
 
     @staticmethod
@@ -82,20 +80,28 @@ have a bound such that dist(x, y) <= sqrt(2).
         - dist(x, z) = 0.7 > margin
 """
 from .siamese_net import ContrastiveLoss
+import torch
 import math
 
-x = torch.Tensor([1.0, 0.0])
-y = torch.Tensor([(10 - 1*math.sqrt(2)) / 10,  1*math.sqrt(2) / 10])
-z = torch.Tensor([(20 - 7*math.sqrt(2)) / 20,  7*math.sqrt(2) / 20])
+class TestContrastiveLoss:
 
-lefts = torch.stack([x, x, x])
-rights = torch.stack([x, y, z])
-print(f'{lefts=}')
-print(f'{rights=}')
+    def test_init(self):
+        with pytest.raises(ValueError):
+            ContrastiveLoss(margin=-1)
 
-loss_f = ContrastiveLoss(margin=0.5)
-for sim in [0.0, 1.0, 0.25]:
-    length = len(lefts)
-    sims = torch.tensor(sim).repeat(length)
-    mean_losses = loss_f(lefts, rights, sims)
-    print(f'{mean_losses=}')
+    def test_forward(self):
+        loss_f = ContrastiveLoss(margin=0.5)
+
+        x = torch.Tensor([1.0, 0.0])
+        y = torch.Tensor([(10 - 1*math.sqrt(2)) / 10,  1*math.sqrt(2) / 10])
+        z = torch.Tensor([(20 - 7*math.sqrt(2)) / 20,  7*math.sqrt(2) / 20])
+
+        lefts = torch.stack([x, x, x])
+        rights = torch.stack([x, y, z])
+
+        for sim in [0.0, 1.0, 0.25]:
+            length = len(lefts)
+            sims = torch.tensor(sim).repeat(length)
+            mean_losses = loss_f(lefts, rights, sims)
+            assert mean_losses is not None
+
