@@ -72,17 +72,6 @@ class ContrastiveLoss(Module):
         #print(f'\n\t{similarities=}\n\t{distances=}\n\t{loss_1=}\n\t{loss_2=}\n\t{losses=}')
         return torch.mean(losses)
 
-# TODO 3c388fe: Get i'th pair in lexographical order
-#   Currently __getitem__ relies on the entire
-#   set of possible pairs being generated which
-#   is very memory inefficient.
-#
-#   Given i, how to calculate a, b such that (s_a, s_b)
-#   is the i'th possible pair when all pairs are sorted lexographically
-#
-#   Example of lexographical sort:
-#   [0,1,2,3] = [(0,1), (0,2), (0,3), (1, 2), (1,3), (2,3)]
-#
 class SiameseTrainingPairs(Dataset):
     """
     Takes `samples` and `labels` to convert it to a dataset
@@ -132,6 +121,17 @@ class SiameseTrainingPairs(Dataset):
         # TODO 3c388fe
         return len(self.pairs)
 
+
+    # TODO 3c388fe: Get i'th pair in lexographical order
+    #   Currently __getitem__ relies on the entire
+    #   set of possible pairs being generated which
+    #   is very memory inefficient.
+    #
+    #   Given i, how to calculate a, b such that (s_a, s_b)
+    #   is the i'th possible pair when all pairs are sorted lexographically
+    #
+    #   Example of lexographical sort:
+    #   [0,1,2,3] = [(0,1), (0,2), (0,3), (1, 2), (1,3), (2,3)]
     def __getitem__(self, idx):
         """
         Params
