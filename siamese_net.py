@@ -131,7 +131,7 @@ class SiameseTrainingPairs(Dataset):
     #   is the i'th possible pair when all pairs are sorted lexographically
     #
     #   Example of lexographical sort:
-    #   [0,1,2,3] = [(0,1), (0,2), (0,3), (1, 2), (1,3), (2,3)]
+    #   [0,1,2,3] -> [(0,1), (0,2), (0,3), (1, 2), (1,3), (2,3)]
     def __getitem__(self, idx):
         """
         Params
@@ -161,9 +161,11 @@ class SiameseNet(Module):
 
     def __init__(self, layers):
         """
-        init
+        Params
+        ======
+        layers | List[torch.Layer]
+            The model to train consisting as a list of layers
         """
-        # TODO doc test
         super(Net, self).__init__()
         self.layers = ParameterList(layers)
 
