@@ -90,6 +90,7 @@ class TestContrastiveLoss:
             ContrastiveLoss(margin=-1)
 
     def test_forward(self):
+        # TODO: The outputs of the function shold be tested properly
         loss_f = ContrastiveLoss(margin=0.5)
 
         x = torch.Tensor([1.0, 0.0])
