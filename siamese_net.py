@@ -110,6 +110,10 @@ class SiameseTrainingPairs(Dataset):
             Not strictly necessary but similarity_func is treated as a function
             commutative in its arguments.
         """
+        if len(samples) != len(sample_info):
+            raise ValueError(f'{len(samples)=}, {len(sample_info)=}'
+                             + 'samples and sample_info should be the same'
+                             + 'length')
         self.samples = samples
         self.sample_info = sample_info
         self.similarity_func = similarity_func
