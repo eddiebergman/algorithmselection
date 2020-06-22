@@ -54,6 +54,13 @@ class ContrastiveLoss(Module):
                 0 - Fully similar
                 1 - Fully disimilar
         """
+        # TODO 972895609 experiment with no margin effect
+        #   Contrastive loss composes of two main parts,
+        #   loss_1:
+        #       Similar points that are distant or penalized
+        #   loss_2:
+        #       Disimilar points that are close are penalized
+
         dist_f = PairwiseDistance(eps=1e-09)
         distances = dist_f(lefts, rights)
 
