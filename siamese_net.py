@@ -150,7 +150,7 @@ class SiameseTrainingPairs(Dataset):
         s = self.samples
         m = self.sample_info
 
-        similarity = self.similarity_func(s[i], m[i], s[j], m[j])
+        similarity = self.similarity_func(s[i], s[j], m[i], m[j])
         return (s[i], s[j], similarity)
 
 class SiameseNet(Module):
