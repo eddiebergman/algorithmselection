@@ -1,10 +1,8 @@
 import torch
 import itertools
-from torch.nn import Module, ParameterList, Linear, PairwiseDistance
-from torch.nn.functional import leaky_relu
+from torch.nn import Module, ModuleList, PairwiseDistance
 from torch.optim import Adam
-from torch.utils.data import Dataset
-from math import comb
+from torch.utils.data import Dataset, DataLoader
 
 seed = 42
 torch.manual_seed(seed)
@@ -169,8 +167,8 @@ class SiameseNet(Module):
         layers | List[torch.Layer]
             The model to train consisting as a list of layers
         """
-        super(Net, self).__init__()
-        self.layers = ParameterList(layers)
+        super(SiameseNet, self).__init__()
+        self.layers = ModuleList(layers)
 
     def forward(self, x):
         """
@@ -190,8 +188,8 @@ class SiameseNet(Module):
             x = layer(x)
         return x
 
-    def train(self, samples=None, samples_info=None, similarity_f=None, epochs=3,
-              batch_size=128, dataset=None):
+    def train(self, samples=None, sample_info=None, similarity_f=None, epochs=3,
+              batch_size=128, dataset=None, margin=2.0):
         """
         Trains the Siamese Neural Network (Snn)
 
@@ -201,7 +199,7 @@ class SiameseNet(Module):
             The samples the Snn will use to train its embedding from feature
             to embeddings space.
 
-        samples_info | iterable (n_samples)
+        sample_info | iterable (n_samples)
             Any additional meta information for each sample that factors into
             a similarity function.
 
@@ -221,32 +219,36 @@ class SiameseNet(Module):
         dataset | torch.Dataset
             Provide a dataset to load from.
         """
-        params = [samples, samples_info, similarity_f]
-        assert all([p is not None for p in params]) or dataloader is not None, \
-            f'Please specifiy each param `sample`, `samples_info`, `similarity_f`'
+        params = [samples, sample_info, similarity_f]
+        assert all([p is not None for p in params]) or dataset is not None, \
+            f'Please specifiy each param `sample`, `sample_info`, `similarity_f`'
 
         if dataset is None:
             dataset = SiameseTrainingPairs(samples, sample_info, similarity_f)
 
         dataloader = DataLoader(dataset, batch_size=batch_size)
 
-        criterion = ContrastiveLoss()
-        optimizer = Adam(net.parameteres(), lr=0.005)
+        criterion = ContrastiveLoss(margin=margin)
+        optimizer = Adam(self.parameters(), lr=0.005)
 
         for epoch in range(0, epochs):
             print(f'{epoch=}')
             epoch_loss = 0.0
 
             for batch, (lefts, rights, similarities) in enumerate(dataloader):
-                print(f'\t{batch=}')
+                if batch % 100 == 0:
+                    print(f'\t{batch=}')
                 optimizer.zero_grad()
-                loss = criterion(lefts, rights, similarities)
+                embedded_lefts = self.forward(lefts)
+                embedded_rights = self.forward(rights)
+                loss = criterion(embedded_lefts, embedded_rights, similarities)
                 loss.backward()
                 optimizer.step()
 
+                print(f'batch_loss={loss.item()}')
                 epoch_loss += loss.item()
 
-            print(f'{epoch_loss=}')
+            print(f'{epoch_loss/len(dataloader)=}')
 
         print('finished')
 

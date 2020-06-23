@@ -1,2 +1,6 @@
 .venv
 tags
+.pytest_cache
+images
+*.egg*
+__pycache__
