@@ -1,6 +1,7 @@
+import pytest
 import torch
 import math
-from .siamese_net import ContrastiveLoss
+from torchsnn.snn import ContrastiveLoss
 
 class TestContrastiveLoss:
 
