@@ -167,6 +167,10 @@ class SiameseNet(Module):
         layers | List[torch.Layer]
             The model to train consisting as a list of layers
         """
+        if layers is None or layers == []:
+            raise ValueError(f'{layers=}\n'
+                             + 'Must define the architecture of the SiameseNet')
+
         super(SiameseNet, self).__init__()
         self.layers = ModuleList(layers)
 
