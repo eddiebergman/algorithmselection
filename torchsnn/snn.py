@@ -193,7 +193,7 @@ class SiameseNet(Module):
         return x
 
     def train(self, samples=None, sample_info=None, similarity_f=None, epochs=3,
-              batch_size=128, dataset=None, margin=2.0):
+              batch_size=128, dataset=None, margin=2.0, verbose=True):
         """
         Trains the Siamese Neural Network (Snn)
 
@@ -233,14 +233,14 @@ class SiameseNet(Module):
         dataloader = DataLoader(dataset, batch_size=batch_size)
 
         criterion = ContrastiveLoss(margin=margin)
+
         optimizer = Adam(self.parameters(), lr=0.005)
 
         for epoch in range(0, epochs):
-            print(f'{epoch=}')
             epoch_loss = 0.0
 
             for batch, (lefts, rights, similarities) in enumerate(dataloader):
-                if batch % 100 == 0:
+                if batch % 100 == 0 and verbose:
                     print(f'\t{batch=}')
                 optimizer.zero_grad()
                 embedded_lefts = self.forward(lefts)
@@ -249,12 +249,7 @@ class SiameseNet(Module):
                 loss.backward()
                 optimizer.step()
 
-                print(f'batch_loss={loss.item()}')
                 epoch_loss += loss.item()
 
-            print(f'{epoch_loss/len(dataloader)=}')
-
-        print('finished')
-
-
-
+            if verbose:
+                print(f'{epoch=}')
