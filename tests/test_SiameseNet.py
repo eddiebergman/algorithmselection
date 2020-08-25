@@ -41,7 +41,6 @@ class TestSiameseNet:
         embedded_xs = snn.forward(xs)
         assert not torch.equal(xs, embedded_xs)
 
-
     def test_train(self):
         """
         Test that the training has same class points move closer

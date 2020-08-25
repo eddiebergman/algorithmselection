@@ -10,6 +10,8 @@ pytest = "*"
 torch = "*"
 scikit-learn = "*"
 matplotlib = "*"
+pandas = "*"
+tables = "*"
 
 [requires]
 python_version = "3.8"

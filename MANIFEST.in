@@ -1,0 +1,2 @@
+exclude data/training.h5
+exclude data/test.h5
