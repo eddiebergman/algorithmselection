@@ -6,7 +6,7 @@ Each `<configuration_name>` folder should have a `config.json` that specifies
 what should be run. These do not have to be in the module folder as a result.
 
 ## Commands
-* `--state <config>`
+* `--info <config>`
     * Should return info on the current state of the experiment in case it was
         interupted early.
 
