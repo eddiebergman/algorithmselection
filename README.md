@@ -23,7 +23,10 @@ what should be run. These do not have to be in the module folder as a result.
 # Config
 {
     'seed': 1337,
-    'dataset': '/path/to/dataset' | 'openmlcc18' ,
+    'dataset': {
+        'path' : '/path/to/dataset' | 'openmlcc18' ,
+        'kind' : 'regression'
+    }
     'split': '[.3, .5, .2]',    # algo training, snn training, snn testing
 
     # Mutually exclusive [train_test_split or kfold]
