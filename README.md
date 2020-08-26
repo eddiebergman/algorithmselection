@@ -2,16 +2,21 @@
 A seperate folder for each experiment to keep everything together
 * `store -> <configuration_name>`
 
-Each `<configuration_name>` folder should have a `config.json` that sepcifies
+Each `<configuration_name>` folder should have a `config.json` that specifies
 what should be run. These do not have to be in the module folder as a result.
 
 ## Commands
-* `--verify [config]`
+* `--state <config>`
+    * Should return info on the current state of the experiment in case it was
+        interupted early.
+
+* `--verify <config>`
     * Should verify the integrity of the entire state and give a diagnostics of what went wrong if not. 
     Verify if all directory's are there, if all configs are in place and all configs can be parsed.
 
-* `--run [config]`
-    * Runs the listed config and resumes progress if it was halted
+* `--run <config> [--next]`
+    * Runs the listed config and resumes progress if it was halted. The option
+    `--next` lets you specify to only run the next step.
 
 ## Configs
 ```JSON
