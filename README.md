@@ -6,9 +6,6 @@ Each `<configuration_name>` folder should have a `config.json` that sepcifies
 what should be run. These do not have to be in the module folder as a result.
 
 ## Commands
-* `--list [config]`
-    * Should list the filename of everything available under headers
-
 * `--verify [config]`
     * Should verify the integrity of the entire state and give a diagnostics of what went wrong if not. 
     Verify if all directory's are there, if all configs are in place and all configs can be parsed.
