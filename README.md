@@ -23,11 +23,28 @@ what should be run. These do not have to be in the module folder as a result.
 # Config
 {
     'seed': 1337,
+
     'dataset': {
-        'path' : '/path/to/dataset' | 'openmlcc18' ,
-        'kind' : 'regression'
+        # If a benchmark is specified, most of the rest is ignored
+        'path' : '/path/to/dataset' || 'openmlcc18' ,
+        'kind' : 'regression',
+        'label_column': 'label',
+
+        # Options betwen 'kfold' and 'train_test' for snn evaluation
+        # Must specify a segment for algorithm training though
+        'split': {
+            'seed': 1337,
+            'kind': 'kfold' || 'train_test'
+            'k' : 5                 # Specify if kind=kfold
+
+            'algorithm_training' : 0.3
+            'snn_training' : 0.7
+            'snn_testing' : 0.0
+        }
+
+        # Whether to keep a copy of the original dataset, default to true
+        'copy' : true,
     }
-    'split': '[.3, .5, .2]',    # algo training, snn training, snn testing
 
     # Mutually exclusive [train_test_split or kfold]
     'train_test_split': {
@@ -45,7 +62,8 @@ what should be run. These do not have to be in the module folder as a result.
     'layers' : [] || 'auto' || 'method',
 
     # How the snn should be trained, options to be added here
-    'training_opts' : {
+    'snn_training_opts' : {
+        'performance_normalizing': 'something'
         'training_method' : 'default',
         'loss_function' : {
             'kind': 'contrastive_loss',
@@ -54,6 +72,9 @@ what should be run. These do not have to be in the module folder as a result.
         },
     },
 
+    # How an algorithms performance should be measured
+    'algorithm_performance_function' : 'something'
+
     # The seleciton of algorithms to train
     'algorithms' : {
         'id1' : {
@@ -61,6 +82,9 @@ what should be run. These do not have to be in the module folder as a result.
             'params': {
                 'algo_specific' : 'value'
             }
+        },
+        'id2' : {
+            ....
         }
     },
 
@@ -83,9 +107,35 @@ It would be good to put in some progress tracking.
 
 Some major milestones are:
 * algorithm training
-* algorithm evaluation on dataset
+* algorithm predictions
+* algorithm performances
 * snn training
 * snn evaluation
+
+```JSON
+{
+    'algorithms_training' : {
+        'id1': { 'trained': True, 'model': 'path/to/model'},
+        'id2': {...}
+    },
+    'algorithm_predictions' : {
+        'id1': { 'predictions' : 'path/to/predictions'},
+        'id2': {...}
+    },
+    'algorithm_performances' : {
+        'id1' : { 'performances': 'path/to/performances'},
+        'id2': {...}
+    }
+    'snn_training' : {
+        'trained': false,
+        'model': 'path/to/model',
+    }
+    'snn_evaluation' : {
+        'trained': false,
+        'selections': 'path/to/choices'
+    }
+}
+```
 
 ## make
 Read the make file
