@@ -1,0 +1,30 @@
+{
+    "seed": 1337,
+    "dataset": "./tests/store/datasets/sample.h5",
+    "split": [0.3, 0.5, 0.2],
+    "train_test_split": {
+        "algorithm_training" : 0.3,
+        "snn_training": 0.5,
+        "snn_evaluation": 0.2
+    },
+    "layers" : [],
+    "training_method" : "default",
+    "loss_function" : {
+            "kind": "contrastive_loss",
+            "param1": "y",
+            "param2": "x"
+    },
+    "algorithms" : {
+        "id1" : {
+            "kind": "from_selected_list",
+            "params": {
+                "algo_specific" : "value"
+            }
+        }
+    },
+    "save_algorithms" : true,
+    "save_snn": true,
+    "results": {
+        "timings" : true
+    }
+}

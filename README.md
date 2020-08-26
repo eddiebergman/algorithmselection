@@ -1,73 +1,45 @@
-# Local help me readme
-Incase of returning after a while
+## Module Structure
+A seperate folder for each experiment to keep everything together
+* `store -> <configuration_name>`
 
-## Directory structure
-I think a seperate directory for the following would help
-organize things.
-
-* SNN
-    * Configs
-    * Saved Models
-
-* Algorithm
-    * Configs
-    * Saved Models
-
-* Results
-    * algorithm_performances
+Each `<configuration_name>` folder should have a `config.json` that sepcifies
+what should be run. These do not have to be in the module folder as a result.
 
 ## Commands
-* `--list`, `--list-all`
+* `--list [config]`
     * Should list the filename of everything available under headers
 
-* `--list-snn`
-    * Should list the available configs along with whether that particular config has been trained
+* `--verify [config]`
+    * Should verify the integrity of the entire state and give a diagnostics of what went wrong if not. 
+    Verify if all directory's are there, if all configs are in place and all configs can be parsed.
 
-* `--list-algorithms`
-    * Same as above but for algorithms, should also list the available algorithms,
-    probably Sklearn models for now.
-
-* `--list-results`
-    * List all available result files
-
-
-* `--verify`
-    * Should verify the integrity of the entire state and give a diagnostics of what went wrong if not. Verify if all directory's are there, if all configs are in place and all configs can be parsed.
-
-* `--train-algorithm [config | configdir]`
-    * Trains the listed algorithm configs on the specified dataset. If a
-    directory is specified then it trains all of them as a 'suite'.
-
-
-* `--train-snn [config | configdir]`
-    * Trains the listed snn configs on the specified dataset.
-    Likewise for directory
-
-* `--run-openml-cc18-benchmark` [config | configdir]
-    * Runs an snn config/configs on the openmlcc18 benchmark
+* `--run [config]`
+    * Runs the listed config and resumes progress if it was halted
 
 ## Configs
-The filename is used as a unique identifier when saving a model.
-If `kfold` and `save` is specified, the names are suffixed with `<name>_k001`.
-
 ```JSON
-# Algorithm Config
+# Config
 {
-    'algorithm': 'some_keyword_from_available list',
-    'dataset': '/path/to/dataset',
-    'params': {
-        # Individual algorithm parameters that need to be tuned
+    'seed': 1337,
+    'dataset': '/path/to/dataset' | 'openmlcc18' ,
+    'split': '[.3, .5, .2]',    # algo training, snn training, snn testing
+
+    # Mutually exclusive [train_test_split or kfold]
+    'train_test_split': {
+        'algorithm_training' : .3,
+        'snn_training': .5,
+        'snn_evaluation': .2
     },
-    'kfold' : '5',
-    'save': True
-}
-```
+    'kfold': {
+        'k': 5,
+        'algo_training': .3,
+        'snn': .7
+    }
 
-```JSON
-# SNN Config
-{
-    'layers' : [] || 'auto' || style, # Since we have a variable amount of
-                                      # inputs in the benchmark
+    # Since we have a variable amount of inputs in the benchmark
+    'layers' : [] || 'auto' || 'method',
+
+    # How the snn should be trained, options to be added here
     'training_opts' : {
         'training_method' : 'default',
         'loss_function' : {
@@ -75,13 +47,40 @@ If `kfold` and `save` is specified, the names are suffixed with `<name>_k001`.
             'param1': 'y',
             'param2': 'x'
         },
-    }
-    'algorithms' : [] || 'path/to/suite_dir', # Algorithms to use in evaluation
+    },
+
+    # The seleciton of algorithms to train
+    'algorithms' : {
+        'id1' : {
+            'kind': 'from_selected_list',
+            'params': {
+                'algo_specific' : 'value'
+            }
+        }
+    },
+
+    # Whether to save the algorithm models
     'save_algorithms' : True,
-    'kfold' : '5',
-    'save': True
+
+    # Whether to save the SNN model
+    'save_snn': True
+
+    # Result tracker, the set of results to keep track of and write to file
+    'results': {
+        'timings' : True
+    }
 }
 ```
+
+## Progress
+The project takes place in several steps at which it could fail at any point.
+It would be good to put in some progress tracking.
+
+Some major milestones are:
+* algorithm training
+* algorithm evaluation on dataset
+* snn training
+* snn evaluation
 
 ## make
 Read the make file
