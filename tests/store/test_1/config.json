@@ -1,16 +1,15 @@
 {
-    "seed": 1337,
     "dataset": {
-        "path" : "/path/to/dataset",
-        "kind" : "regression",
+        "kind": "regression",
         "label_column": "int_rate",
-
+        "path": "/path/to/dataset",
         "split": {
-            "seed": 1337,
+            "algorithm_training": 0.3,
             "kind": "train_test",
-            "algorithm_training" : 0.3,
-            "snn_training" : 0.6,
-            "snn_testing" : 0.1
+            "seed": 1337,
+            "snn_testing": 0.1,
+            "snn_training": 0.6
         }
-    }
+    },
+    "seed": 1337
 }
