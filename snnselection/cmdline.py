@@ -2,6 +2,8 @@ import os
 import json
 import argparse
 
+from state import load
+
 def valid_file(filepath):
     """
     'Type' for argparse - checks that file exists but does not open it.
@@ -46,6 +48,7 @@ def run_cmd(config_path, step=False):
     step | bool -> False
         Whether to take a single step or run the whole config
     """
+    state = load(config_path)
     pass
 
 
