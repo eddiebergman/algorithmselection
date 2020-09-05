@@ -44,15 +44,18 @@ class State:
 
 class JSONStateFile:
 
-    def __init__(self, obj, save_to):
+    def __init__(self, obj, save_to, autoload=True):
         self.obj = obj
         self.save_to = save_to
 
-    @staticmethod
-    def load(filepath):
-        with open(filepath, 'r') as fp:
-            obj = json.load(fp)
-            return JSONStateFile(obj, filepath)
+        if os.path.exists(self.save_to):
+            if autoload:
+                with open(filepath, 'r') as fp:
+                    self.obj = json.load(fp)
+            else:
+                raise FileExistsError(f'{save_to} already exists and `autoload`\
+                                        has been set to {autoload}')
+
 
     def save(self, to=None):
         to = self.save_to if to is None else to

@@ -49,6 +49,21 @@ def run_cmd(config_path, step=False):
         Whether to take a single step or run the whole config
     """
     state = load(config_path)
+
+    config = state.config
+
+    if config['kind'] == 'openml-task':
+        pass
+
+    elif config['kind'] == 'openml-suite':
+        pass
+
+    elif config['kind'] == 'dataset':
+        pass
+
+    else:
+        raise ValueError(f'Unrecognized config.kind `{config["kind"]}`')
+
     pass
 
 
