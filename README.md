@@ -23,7 +23,8 @@ what should be run. These do not have to be in the module folder as a result.
 # Config
 {
     'seed': 1337,
-    'kind' : 'dataset' | 'openml-task' | 'openml-suite'
+    'kind' : 'dataset' | 'openml-task' | 'openml-suite',
+    'save_dir': './mytestdirectory'
 
     'dataset': {
         'path' : '/path/to/dataset',
