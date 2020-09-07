@@ -1,8 +1,15 @@
 import os
 import json
 
-def load(config_path):
-    return State(config_path)
+def from_json(fpath):
+    obj = {}
+    with open(fpath, 'r') as fp:
+         obj = json.load(fp)
+    return obj
+
+def to_json(obj, fpath):
+    with open(fpath, 'w') as fp:
+        json.dump(obj, fp, sort_keys=True, indent=4)
 
 class State:
 
@@ -10,69 +17,40 @@ class State:
         if not os.path.exists(config_path):
             raise ValueError('No file found at {config_path}')
 
-        dirname = os.path.dirname(os.path.realpath(config_path))
+        self.config = from_json(config_path)
+        self.config_path = os.path.abspath(config_path)
 
-        progress_path = os.path.join(dirname, 'progress.json')
-        results_path = os.path.join(dirname, 'results.json')
+        save_dir = os.path.abspath(self.config['save_dir'])
 
-        config = JSONStateFile.load(config_path)
+        self.progress_path = os.path.join(save_dir, 'progress.json')
+        self.results_path = os.path.join(save_dir, 'results.json')
 
-        # Checks for existing results/progress or creates a new state file
-        if os.path.exists(results_path):
-            results = JSONStateFile.load(results_path)
+        if os.path.exists(self.results_path):
+            self.results = from_json(self.results_path)
         else:
-            results = JSONStateFile({}, results_path)
+            self.results = {}
 
-        if os.path.exists(progress_path):
-            progress = JSONStateFile.load(progress_path)
+        if os.path.exists(self.progress_path):
+            self.progress = from_json(self.progress_path)
         else:
-            progress = JSONStateFile({}, progress_path)
+            self.progress = {}
 
-        self.config = config
-        self.results = results
-        self.progress = progress
-
-    def save(self):
-        self.config.save()
-        self.results.save()
-        self.progress.save()
+    def save(self, which='all'):
+        if which == 'all':
+            to_json(self.config, self.config_path)
+            to_json(self.results, self.results_path)
+            to_json(self.progress, self.progress_path)
+        elif which == 'config':
+            to_json(self.config, self.config_path)
+        elif which == 'results':
+            to_json(self.results, self.results_path)
+        elif which == 'progress':
+            to_json(self.progress, self.progress_path)
+        else:
+            raise ValueError('Must specify which={all | config | results |\
+                             progress}')
 
     def __str__(self):
         return '\n'.join([
             str(self.config), str(self.results), str(self.progress)
         ])
-
-class JSONStateFile:
-
-    def __init__(self, obj, save_to, autoload=True):
-        self.obj = obj
-        self.save_to = save_to
-
-        if os.path.exists(self.save_to):
-            if autoload:
-                with open(filepath, 'r') as fp:
-                    self.obj = json.load(fp)
-            else:
-                raise FileExistsError(f'{save_to} already exists and `autoload`\
-                                        has been set to {autoload}')
-
-
-    def save(self, to=None):
-        to = self.save_to if to is None else to
-        with open(to, 'w') as fp:
-            json.dump(self.obj, fp, sort_keys=True, indent=4)
-
-    def __delitem__(self, key):
-        self.obj.__delattr__(key)
-
-    def __getitem__(self, key):
-        return self.obj.__getattribute__(key)
-
-    def __setitem__(self, key, value):
-        self.obj.__setattr__(key, value)
-
-    def __repr__(self):
-        return f"<JSONStateFile fp:{self.save_to}>"
-
-    def __str__(self):
-        return self.obj.__str__()
