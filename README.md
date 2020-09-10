@@ -31,10 +31,11 @@ what should be run. These do not have to be in the module folder as a result.
         'kind' : 'regression' | 'classification' | 'clustering'
         'label_column': 'label_name' | 13,
     } |
-    'openml-task' : {
+    'openml_task' : {
         'id' : 99,
+        'save_models' : 'all' | 'best' | 'none'
     } |
-    'openml-suite' : {
+    'openml_suite' : {
         'id' : 99,
         'alias' : 'OpenML-CC18'
     }

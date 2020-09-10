@@ -12,6 +12,7 @@ scikit-learn = "*"
 matplotlib = "*"
 pandas = "*"
 tables = "*"
+autosklearn = "*"
 
 [requires]
 python_version = "3.8"

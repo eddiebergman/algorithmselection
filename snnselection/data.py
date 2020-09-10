@@ -27,15 +27,18 @@ class Dataset:
         return self.id_string
 
 
-class OpenMLTaskIterator:
+class OpenMLTask:
 
     def __init__(self, task_id, allow_samples=False):
-        self.task = openml.tasks.get_task(task_id)
-        X, y = OpenMLTaskIterator.process_openml_task(task)
+        task = openml.tasks.get_task(task_id)
+        X, y = OpenMLTask.process_openml_task(task)
+
+        self.task = task
         self.X = X
         self.y = y
         self.allow_samples = False
-        n_repeats, n_folds, n_samples = task.get_split_dimensions()
+
+        n_repeats, n_folds, n_samples = self.task.get_split_dimensions()
 
         if not allow_samples and n_samples != 1:
                 raise ValueError(f'Task {task.id} has {n_samples} samples'
@@ -53,12 +56,16 @@ class OpenMLTaskIterator:
 
     def __next__(self):
         i_repeat, i_fold, i_sample = next(self.itr)
+        return self.get_dataset(i_repeat, i_fold, i_sample)
+
+    def get_dataset(self, repeat=0, fold=0, sample=0):
         train_idxs, test_idxs = self.task.get_train_test_split_indices(
-            repeat=i_repeat, fold=i_fold, sample=i_sample
+            repeat=repeat, fold=fold, sample=sample
         )
 
         X, y = self.X, self.y
-        id_string = f'r{i_repeat}_f{i_fold}_s{i_sample}'
+        task_id = self.task.id
+        id_string = f't{task_id}_r{repeat}_f{fold}_s{sample}'
 
         return Dataset(
             X_train=X.loc[train_idxs].copy(),
