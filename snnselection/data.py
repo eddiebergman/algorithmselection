@@ -27,6 +27,8 @@ class Dataset:
         return self.id_string
 
 
+
+
 class OpenMLTask:
 
     def __init__(self, task_id, allow_samples=False):
@@ -38,25 +40,24 @@ class OpenMLTask:
         self.y = y
         self.allow_samples = False
 
-        n_repeats, n_folds, n_samples = self.task.get_split_dimensions()
 
         if not allow_samples and n_samples != 1:
                 raise ValueError(f'Task {task.id} has {n_samples} samples'
                                 + 'and allow_samples has been set to False')
 
-        if not allow_samples:
-            self.itr = product(range(n_repeats), range(n_folds), [0])
-        else:
-            self.itr = product(
-                range(n_repeats), range(n_folds), range(n_samples)
-            )
 
     def __iter__(self):
-        return self
+        # Create the numbers to iterate
+        n_repeats, n_folds, n_samples = self.task.get_split_dimensions()
 
-    def __next__(self):
-        i_repeat, i_fold, i_sample = next(self.itr)
-        return self.get_dataset(i_repeat, i_fold, i_sample)
+        sample_range = range(n_samples) if self.allow_samples else [0]
+        self.itr = product(range(n_repeats), range(n_folds), sample_range)
+
+        def task_iterator():
+            for i_repeat, i_fold, i_sample in self.itr:
+                yield self.get_dataset(i_repeat, i_fold, i_sample)
+
+        return task_iterator()
 
     def get_dataset(self, repeat=0, fold=0, sample=0):
         train_idxs, test_idxs = self.task.get_train_test_split_indices(
@@ -65,7 +66,7 @@ class OpenMLTask:
 
         X, y = self.X, self.y
         task_id = self.task.id
-        id_string = f't{task_id}_r{repeat}_f{fold}_s{sample}'
+        id_string = OpenMLTask._id_string(task_id, repeat, fold, sample)
 
         return Dataset(
             X_train=X.loc[train_idxs].copy(),
@@ -74,6 +75,10 @@ class OpenMLTask:
             y_test=y[test_idxs].copy(),
             id_string=id_string
             )
+
+    @staticmethod
+    def _id_string(task_id, repeat, fold, sample):
+        return f't{task_id}_r{repeat}_f{fold}_s{sample}'
 
     @staticmethod
     def process_openml_task(task):
