@@ -34,7 +34,7 @@ class Experiment:
         self.results = self.state.results
         self.progress = self.state.progress
 
-        self.models = {}
+        self.automodels = {}
 
         dflag = debug
 
@@ -78,12 +78,12 @@ class Experiment:
             A list of trained autosklearn classifiers
         """
         task_id = self.config['openml_task']['id']
-        self.task = OpenMLTask(task_id)
+        self._task = OpenMLTask(task_id)
 
         save_mode = self.config['save_models']
         should_save = (save_mode == 'all')
 
-        for dataset in self.task:
+        for dataset in self._task:
 
             automodel = None
             if self.model_exists(dataset) and not retrain:
@@ -91,7 +91,13 @@ class Experiment:
             else:
                 automodel = self.train_model(dataset, save=should_save)
 
-            self.models[dataset.id_string] = automodel
+            self.automodels[dataset.id_string] = automodel
+
+    def dataset(self, task_id=-1, repeat=0, fold=0, sample=0):
+        if self.config['kind'] == 'openml_task':
+            return self._task.get_dataset(repeat, fold, sample)
+        else:
+            raise NotImplemented
 
     def train_model(self, dataset, save=True):
         """ Trains a model on a dataset """
@@ -125,7 +131,7 @@ class Experiment:
         if kind != 'openml_task':
             raise RunTimeError(f'Experiment is for {kind} and not openml_task')
 
-        return self.task
+        return self._task
 
     @staticmethod
     def _fit_transformers_hack_(automodel, X_train, y_train):
@@ -135,7 +141,7 @@ class Experiment:
         predict...anyways
         """
         for model in Experiment.get_ensemble(automodel):
-            model.fit_tranformer(X_train, y_trian)
+            model.fit_transformer(X_train, y_train)
 
     @staticmethod
     def get_ensemble(automodel):
