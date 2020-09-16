@@ -15,7 +15,7 @@ class State:
 
     def __init__(self, config_path):
         if not os.path.exists(config_path):
-            raise ValueError('No file found at {config_path}')
+            raise ValueError(f'No file found at {config_path}')
 
         self.config = from_json(config_path)
         self.config_path = os.path.abspath(config_path)

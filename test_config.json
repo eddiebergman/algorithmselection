@@ -1,12 +1,15 @@
 {
     "id": "testing",
-    "seed": 1337,
-    "time_per_task_iteration": 300,
+    "seed": 1550,
+    "time_per_task_iteration": 240,
     "save_dir": "/home/skantify/torch_siamesenet/1550_5min",
 
     "save_models": "all",
     "kind" : "openml_task",
+
     "openml_task" : {
-        "id" : 31
+        "id" : 31,
+        "max_folds" : 1,
+        "ensemble_size" : 10
     }
 }

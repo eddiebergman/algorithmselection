@@ -7,10 +7,10 @@ from sklearn.preprocessing import LabelEncoder
 class Dataset:
     """
     Wrapper around a dataset that is to be trained on,
-    WILL corrupt data
+    this WILL corrupt data so populate with copies.
 
     Consists of training samples, and test samples with their corresponding
-    labels as well as a unique identifier
+    labels as well as a unique identifier.
     """
 
     def __init__(self, X_train, y_train, X_test, y_test, id_string):
@@ -31,7 +31,7 @@ class Dataset:
 
 class OpenMLTask:
 
-    def __init__(self, task_id, allow_samples=False):
+    def __init__(self, task_id, allow_samples=False, max_folds=None):
         task = openml.tasks.get_task(task_id)
         X, y = OpenMLTask.process_openml_task(task)
 
@@ -39,16 +39,19 @@ class OpenMLTask:
         self.X = X
         self.y = y
         self.allow_samples = False
+        self.max_folds = max_folds
 
-
+        _, _, n_samples = self.task.get_split_dimensions()
         if not allow_samples and n_samples != 1:
                 raise ValueError(f'Task {task.id} has {n_samples} samples'
                                 + 'and allow_samples has been set to False')
 
 
     def __iter__(self):
-        # Create the numbers to iterate
         n_repeats, n_folds, n_samples = self.task.get_split_dimensions()
+
+        if self.max_folds and self.max_folds < n_folds:
+            n_folds = self.max_folds
 
         sample_range = range(n_samples) if self.allow_samples else [0]
         self.itr = product(range(n_repeats), range(n_folds), sample_range)

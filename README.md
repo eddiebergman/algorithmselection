@@ -33,7 +33,8 @@ what should be run. These do not have to be in the module folder as a result.
     } |
     'openml_task' : {
         'id' : 99,
-        'save_models' : 'all' | 'best' | 'none'
+        'save_models' : 'all' | 'best' | 'none',
+        'folds' : 1
     } |
     'openml_suite' : {
         'id' : 99,
