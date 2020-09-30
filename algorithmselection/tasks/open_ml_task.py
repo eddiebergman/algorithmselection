@@ -55,9 +55,9 @@ class OpenMLTaskWrapper(Task[Key]):
     """
 
     def __init__(
-            self, 
-            save_dir: str, 
-            task: Config, 
+            self,
+            save_dir: str,
+            task: Config,
             store_models: Optional[bool] = True
     ):
         super().__init__(save_dir, task, store_models)

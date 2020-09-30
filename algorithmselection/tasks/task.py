@@ -109,6 +109,8 @@ class Task(ABC, Generic[Key]):
         self.save_dir = save_dir
         self.store_models = store_models
 
+        self.task_type = task_config['task_type']
+
         self.ensembles: Dict[Key, Ensemble] = {}
         self.selectors: Dict[Key, Selector] = {}
 
@@ -136,7 +138,7 @@ class Task(ABC, Generic[Key]):
 
             ensemble = None
             if self.ensemble_exists(key):
-                print(f'\Ensemble already exists, {ensemble_config}')
+                print(f'Ensemble already exists, {ensemble_config}')
 
                 if self.store_models:
                     ensemble = self.load_ensemble(key)
@@ -193,6 +195,9 @@ class Task(ABC, Generic[Key]):
     @abstractmethod
     def name(self, key: Key) -> str:
         """ Returns a string representation of a model key """
+
+    def has_selector(self) -> bool:
+        return self.task['selector']['kind'] is not None
 
     def ensemble_path(self, key: Key) -> str:
         """ Gives the path the ensemble would be stored at """

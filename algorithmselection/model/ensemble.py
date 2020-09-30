@@ -6,9 +6,9 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from .base import ModelType
+from .base import ModelType, Predictor
 
-class Ensemble(ABC):
+class Ensemble(ABC, Predictor):
     """
     Encapsulates an ensemble, implementors must
     focus on two main points,
@@ -21,7 +21,7 @@ class Ensemble(ABC):
 
     @abstractmethod
     def __init__(self, **kwargs):
-        pass
+        super().__init__()
 
     @abstractmethod
     def trained(self) -> bool:

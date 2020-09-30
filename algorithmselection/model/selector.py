@@ -8,10 +8,10 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from .ensemble import Ensemble
-from .base import ModelType
+from .base import ModelType, Predictor
 from ..util import instance_wise
 
-class Selector(ABC):
+class Selector(ABC, Predictor):
     """
     A base class for a selector that encapsulates common training types
     and computations required.
@@ -19,6 +19,7 @@ class Selector(ABC):
 
     @abstractmethod
     def __init__(self, ensemble: Ensemble, **kwargs) -> None:
+        super().__init__()
         self.ensemble = ensemble
 
     @abstractmethod

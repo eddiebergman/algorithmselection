@@ -14,14 +14,14 @@ from .config_defaults import defaults
 
 
 def taskrunner(
-    config_path: str, 
+    config_path: str,
     store_tasks: Optional[bool] = True,
     autorun: Optional[bool] = False
 ):
     """ Runs a task described by config path """
 
-    config : Dict[str, Any] = {}
-    tasks : Dict[str, Task] = {}
+    config: Dict[str, Any] = {}
+    tasks: Dict[str, Task] = {}
 
     with open(config_path) as file:
         config = json.load(file)
@@ -47,8 +47,8 @@ def taskrunner(
 
         task = None
         if task_kind == 'openml_task':
-            task = OpenMLTaskWrapper(save_dir, 
-                                     task_description, 
+            task = OpenMLTaskWrapper(save_dir,
+                                     task_description,
                                      store_models=store_tasks)
 
         elif task_kind == 'local_dataset':
@@ -71,4 +71,3 @@ def taskrunner(
         gc.collect()
 
     return tasks
-
