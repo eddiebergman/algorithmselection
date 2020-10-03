@@ -12,19 +12,19 @@ from typing import (
 from numpy import ndarray
 
 from ..config_defaults import defaults
-from ..model.ensemble import Ensemble, ensembles
-from ..model.selector import Selector, selectors
-from ..model.ensemble_evaluators import ensemble_evaluators
+from ..models import Ensemble, ensembles
+from ..models import Selector, selectors
+from ..models import ensemble_evaluators
 
 # TODO fix the registering and pickling issue, something to do
 #   with how it's imported
 # PickleError: object <class X> is not the same as X
 # pylint: disable=unused-import
-from ..model.autosklearn.ensembles import (
+from ..models.autosklearn.ensembles import (
     AutoSklearnClassifierEnsemble, AutoSklearnRegressorEnsemble
 )
 # pylint: disable=unused-import
-from ..model.autosklearn.selectors import (
+from ..models.autosklearn.selectors import (
     AutoSklearnClassifierSelector, AutoSklearnRegressorSelector
 )
 
@@ -91,6 +91,7 @@ def train_selector(
 Key = TypeVar('Key')
 
 
+# TODO still need some way to indicate the tasks type
 class Task(ABC, Generic[Key]):
     """
     Subclasses of Task define an iterator through keys which are linked to
@@ -108,8 +109,6 @@ class Task(ABC, Generic[Key]):
         self.task = {**defaults['openml_task'], **task_config}
         self.save_dir = save_dir
         self.store_models = store_models
-
-        self.task_type = task_config['task_type']
 
         self.ensembles: Dict[Key, Ensemble] = {}
         self.selectors: Dict[Key, Selector] = {}
