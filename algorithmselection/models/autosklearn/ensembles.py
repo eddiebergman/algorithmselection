@@ -4,6 +4,7 @@ Wrappers around autosklearn models to make them Ensembles
 from typing import Any, List
 
 import numpy as np
+from dask.distributed import Client
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 
@@ -20,7 +21,10 @@ class AutoSklearnClassifierEnsemble(Ensemble):
 
     def __init__(self, **kwargs) -> None:
         super().__init__()
-        self.model = AutoSklearnClassifier(**kwargs)
+        # processes=False is key for ensuring automl stays within
+        # its processor limitations
+        dask_client = Client(n_works=kwargs['n_jobs'], processes=False)
+        self.model = AutoSklearnClassifier(**kwargs, dask_client=dask_client)
 
     # Ensemble Methods
     def trained(self) -> bool:
@@ -63,7 +67,10 @@ class AutoSklearnRegressorEnsemble(Ensemble):
 
     def __init__(self, **kwargs) -> None:
         super().__init__()
-        self.model = AutoSklearnRegressor(**kwargs)
+        # processes=False is key for ensuring automl stays within
+        # its processor limitations
+        dask_client = Client(n_works=kwargs['n_jobs'], processes=False)
+        self.model = AutoSklearnRegressor(**kwargs, dask_client=dask_client)
 
     # Ensemble Methods
     def trained(self) -> bool:
