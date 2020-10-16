@@ -4,6 +4,7 @@ ensembles and selectors
 """
 import os
 import pickle
+#import pickle
 from abc import ABC, abstractmethod
 from typing import (
     Any, TypeVar, Dict, Union, TypedDict, Iterator, Generic, cast, Optional
@@ -50,7 +51,11 @@ def train_ensemble(ensemble_config: Config, data: Dataset) -> Ensemble:
 
     X, y = data['X_ensemble'], data['y_ensemble']
 
-    ensemble.fit(X, y)
+    if ensemble.supports_fit_and_test():
+        X_test, y_test = data['X_test'], data['y_test']
+        ensemble.fit_and_test(X, y, X_test, y_test)
+    else:
+        ensemble.fit(X, y)
 
     # TODO This was put in as a stop measure against single model ensembles
     # Ultimately this should be allowed and a default behaviour should be added
@@ -79,11 +84,17 @@ def train_selector(
     selector_params = selector_config['params']
     selector = selector_cls(ensemble, **selector_params)
 
-    # Selector get's trained to predict some metric of the ensembles
+    # Selector gets trained to predict some metric of the ensembles
     # ability
     X = data['X_selector']
     y = ensemble_evaluator(ensemble, X, data['y_selector'])
-    selector.fit(X, y)
+
+    if selector.supports_fit_and_test():
+        X_test = data['X_test']
+        y_test = ensemble_evaluator(ensemble, X_test, data['y_test'])
+        selector.fit_and_test(X, y, X_test, y_test)
+    else:
+        selector.fit(X, y)
 
     return selector
 
@@ -221,13 +232,14 @@ class Task(ABC, Generic[Key]):
     def save_ensemble(self, ensemble: Ensemble, key: Key) -> None:
         """ Saves the ensemble at path basd on key """
         fpath = self.ensemble_path(key)
-        pickle.dump(ensemble, open(fpath, 'wb'))
+        ensemble.save(fpath)
+        #pickle.dump(ensemble, open(fpath, 'wb'))
 
     def save_selector(self, selector: Selector, key: Key) -> None:
         """ Saves a selector model """
         fpath = self.selector_path(key)
-        print(selector)
-        pickle.dump(selector, open(fpath, 'wb'))
+        selector.save(fpath)
+        #pickle.dump(selector, open(fpath, 'wb'))
 
     def load_ensemble(self, key: Key) -> Ensemble:
         """ Loads an ensemble model """

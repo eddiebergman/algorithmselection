@@ -1,54 +1,37 @@
 """
 Wrappers around autosklearn models to make them Ensembles
 """
-from typing import Any, List
-
 import numpy as np
-from dask.distributed import Client
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
+from dask.distributed import Client
 
 from ..ensemble import Ensemble, register_ensemble
-from ..base import ModelType, is_predictor, is_classifier
-
+from ..model import ModelType
+from .base import AutoSklearnModelMixin
 
 @register_ensemble
-class AutoSklearnClassifierEnsemble(Ensemble):
+class AutoSklearnClassifierEnsemble(AutoSklearnModelMixin, Ensemble):
     """
     Wrapper around an autosklearn model.
     """
     _kind: ModelType = 'classifier'
 
     def __init__(self, **kwargs) -> None:
-        super().__init__()
-        # processes=False is key for ensuring automl stays within
-        # its processor limitations
-        dask_client = Client(n_works=kwargs['n_jobs'], processes=False)
-        self.model = AutoSklearnClassifier(**kwargs, dask_client=dask_client)
+        Ensemble.__init__(self)
+        client = Client(processes=False,
+                        n_workers=kwargs['n_jobs'],
+                        threads_per_worker=1,
+                        dashboard_address=None,
+                        )
+        self.model = AutoSklearnClassifier(**kwargs, dask_client=client)
 
-    # Ensemble Methods
-    def trained(self) -> bool:
-        """ Whether the model is trained or not """
-        # pylint: disable=protected-access
-        return self.model.automl_ is not None
-
-    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
-        """ Fit the model """
-        self.model.fit(X, y)
+    def autosklearn_model(self) -> AutoSklearnClassifier:
+        return self.model
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """ Get the models prediction """
         return self.model.predict_proba(X)
-
-    def models(self) -> List[Any]: # type:ignore
-        models = [member for _, member in self.model.get_models_with_weights()]
-
-        # NOTE: autosklearn is not type safe and it loads objects from pickle
-        #   Must do a runtime check to assert that they can all predict
-        for m in models:
-            assert is_classifier(m), f'`predict_proba(X)` missing, {m=}'
-
-        return models
 
     def model_predictions(self, X: np.ndarray) -> np.ndarray:
         """ Get the models probability predicitons """
@@ -59,42 +42,26 @@ class AutoSklearnClassifierEnsemble(Ensemble):
         return cls._kind
 
 @register_ensemble
-class AutoSklearnRegressorEnsemble(Ensemble):
+class AutoSklearnRegressorEnsemble(AutoSklearnModelMixin, Ensemble):
     """
     Wrapper around an autosklearn model.
     """
     _kind: ModelType = 'regressor'
 
     def __init__(self, **kwargs) -> None:
-        super().__init__()
-        # processes=False is key for ensuring automl stays within
-        # its processor limitations
-        dask_client = Client(n_works=kwargs['n_jobs'], processes=False)
-        self.model = AutoSklearnRegressor(**kwargs, dask_client=dask_client)
+        Ensemble.__init__(self)
+        client = Client(processes=False,
+                        n_workers=kwargs['n_jobs'],
+                        thread_per_worker=1,
+                        dashboard_address=None)
+        self.model = AutoSklearnRegressor(**kwargs, dask_client=client)
 
-    # Ensemble Methods
-    def trained(self) -> bool:
-        """ Whether the model is trained or not """
-        # pylint: disable=protected-access
-        return self.model.automl_ is not None
-
-    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
-        """ Fit the model """
-        self.model.fit(X, y)
+    def autosklearn_model(self) -> AutoSklearnRegressor:
+        return self.model
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """ Get the models prediction """
         return self.model.predict(X)
-
-    def models(self) -> List[Any] : # type:ignore
-        models = [member for _, member in self.model.get_models_with_weights()]
-
-        # NOTE: autosklearn is not type safe and it loads objects from pickle
-        #   Must do a runtime check to assert that they can all predict
-        for m in models:
-            assert is_predictor(m), f'`predict(X)` missing, {m=}'
-
-        return models
 
     def model_predictions(self, X: np.ndarray) -> np.ndarray:
         """ Get the models probability predicitons """

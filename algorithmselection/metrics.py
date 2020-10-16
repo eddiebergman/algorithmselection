@@ -15,6 +15,9 @@ from .util import classifications
 # entail some checking to make sure that the oracle.kind() matches up with
 # the actual kind of task being performed
 
+# TODO This should really just let you pass an ensemble or selector with
+# some data rather than trying to make it super high level and must include
+# an oracle
 Metric = Callable[[np.ndarray, np.ndarray], Any]
 
 def score(

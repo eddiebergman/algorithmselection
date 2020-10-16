@@ -3,7 +3,7 @@ from abc import abstractmethod
 import numpy as np
 
 
-from .base import ModelType
+from .model import ModelType
 from .ensemble_evaluators import correct_classifications
 from .selector import Selector
 from .ensemble import Ensemble
@@ -14,6 +14,9 @@ class Oracle(Selector):
     def __init__(self, ensemble: Ensemble, y: np.ndarray) -> None:
         super().__init__(ensemble)
         self.y = y
+
+    def supports_fit_and_test(self) -> bool:
+        return False
 
     @abstractmethod
     def correct_selections(self, X: np.ndarray) -> np.ndarray:

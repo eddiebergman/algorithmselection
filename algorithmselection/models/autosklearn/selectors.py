@@ -1,14 +1,16 @@
 import numpy as np
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
+from dask.distributed import Client
 
 from ..selector import Selector, register_selector
 from ..ensemble import Ensemble
-from ..base import ModelType
+from ..model import ModelType
+from .base import AutoSklearnModelMixin
 
 
 @register_selector
-class AutoSklearnClassifierSelector(Selector):
+class AutoSklearnClassifierSelector(AutoSklearnModelMixin, Selector):
     """
     Wrapper around autosklearn classifier for use as a Selector.
 
@@ -20,14 +22,12 @@ class AutoSklearnClassifierSelector(Selector):
     _kind: ModelType = 'classifier'
 
     def __init__(self, ensemble: Ensemble, **kwargs) -> None:
-        super().__init__(ensemble)
-        # processes=False is key for ensuring automl stays within
-        # its processor limitations
-        dask_client = Client(n_works=kwargs['n_jobs'], processes=False)
-        self.model = AutoSklearnClassifier(**kwargs, dask_client=dask_client)
-
-    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
-        self.model.fit(X, y)
+        Selector.__init__(self, ensemble)
+        client = Client(processes=False,
+                        n_workers=kwargs['n_jobs'],
+                        threads_per_worker=1,
+                        dashboard_address=None)
+        self.model = AutoSklearnClassifier(**kwargs, dask_client=client)
 
     def selections(self, X: np.ndarray) -> np.ndarray:
         """
@@ -37,13 +37,16 @@ class AutoSklearnClassifierSelector(Selector):
         model_correct_probabilities = self.model.predict_proba(X)
         return np.argmax(model_correct_probabilities, axis=1)
 
-
     @classmethod
     def kind(cls) -> ModelType:
         return cls._kind
 
+    def autosklearn_model(self) -> AutoSklearnClassifier:
+        return self.model
+
+
 @register_selector
-class AutoSklearnRegressorSelector(Selector):
+class AutoSklearnRegressorSelector(AutoSklearnModelMixin, Selector):
     """
     Wrapper around autosklearn regressor for use as a a Selctor.
 
@@ -54,14 +57,12 @@ class AutoSklearnRegressorSelector(Selector):
     _kind: ModelType = 'regressor'
 
     def __init__(self, ensemble: Ensemble, **kwargs) -> None:
-        super().__init__(ensemble)
-        # processes=False is key for ensuring automl stays within
-        # its processor limitations
-        dask_client = Client(n_works=kwargs['n_jobs'], processes=False)
-        self.model = AutoSklearnRegressor(**kwargs, dask_client=dask_client)
-
-    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
-        self.model.fit(X, y)
+        Selector.__init__(self, ensemble)
+        client = Client(processes=False,
+                        n_workers=kwargs['n_jobs'],
+                        threads_per_worker=1,
+                        dashboard_address=None)
+        self.model = AutoSklearnRegressor(**kwargs, dask_client=client)
 
     def selections(self, X: np.ndarray) -> np.ndarray:
         """
@@ -73,3 +74,6 @@ class AutoSklearnRegressorSelector(Selector):
     @classmethod
     def kind(cls) -> ModelType:
         return cls._kind
+
+    def autosklearn_model(self) -> AutoSklearnRegressor:
+        return self.model

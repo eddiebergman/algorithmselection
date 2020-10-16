@@ -3,20 +3,19 @@ Module for defining what a selector does as well as providing
 common traning paradigms and selection strategies
 """
 from typing import Dict, Type
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 import numpy as np
 
 from .ensemble import Ensemble
-from .base import ModelType, Predictor
+from .model import Model
 from ..util import instance_wise
 
-class Selector(ABC, Predictor):
+class Selector(Model):
     """
     A base class for a selector that encapsulates common training types
     and computations required.
     """
-
     @abstractmethod
     def __init__(self, ensemble: Ensemble, **kwargs) -> None:
         super().__init__()
@@ -24,15 +23,6 @@ class Selector(ABC, Predictor):
 
     @abstractmethod
     def selections(self, X: np.ndarray) -> np.ndarray:
-        raise NotImplementedError
-
-    @abstractmethod
-    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def kind(cls) -> ModelType:
         raise NotImplementedError
 
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -59,7 +49,6 @@ class Selector(ABC, Predictor):
             in zip(instance_wise_predictions, selections)
         ])
         return selected_predictions
-
 
 selectors : Dict[str, Type[Selector]] = {}
 
