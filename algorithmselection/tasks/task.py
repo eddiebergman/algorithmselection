@@ -155,17 +155,14 @@ class Task(ABC, Generic[Key]):
                     self.ensembles[key] = ensemble
 
             else:
-                try:
-                    print(f'\tFitting new ensemble, {ensemble_config}')
+                print(f'\tFitting new ensemble, {ensemble_config}')
 
-                    ensemble = train_ensemble(ensemble_config, data)
-                    self.save_ensemble(ensemble, key)
+                ensemble = train_ensemble(ensemble_config, data)
+                self.save_ensemble(ensemble, key)
 
-                    if self.store_models:
-                        self.ensembles[key] = ensemble
+                if self.store_models:
+                    self.ensembles[key] = ensemble
 
-                except ValueError:
-                    print(f'Failed to train {ensemble_config=} for {self.task=}')
 
 
             if selector_config['kind'] is not None and ensemble is not None:
@@ -178,19 +175,16 @@ class Task(ABC, Generic[Key]):
                         selector = self.load_selector(key)
                         self.selectors[key] = selector
                 else:
-                    try:
-                        print(f'\tFitting new selector, {selector_config}')
+                    print(f'\tFitting new selector, {selector_config}')
 
-                        selector = train_selector(selector_config,
-                                              ensemble,
-                                              data)
-                        self.save_selector(selector, key)
+                    selector = train_selector(selector_config,
+                                          ensemble,
+                                          data)
+                    self.save_selector(selector, key)
 
-                        if self.store_models:
-                            self.selectors[key] = selector
+                    if self.store_models:
+                        self.selectors[key] = selector
 
-                    except ValueError:
-                        print(f'Failed to train {selector_config=} for {self.task=}')
 
             print(f'Finised task {self.task["id"]}')
 
