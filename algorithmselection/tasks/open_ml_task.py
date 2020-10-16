@@ -32,6 +32,9 @@ def process_openml_task(task: OpenMLTask) -> Tuple[ndarray, ndarray]:
         elif y.dtype == bool:
             y = y.astype('int')
 
+    if type(y) == pandas.core.series.Series:
+        y = y.to_numpy()
+
     # Process NA's
     for col in X.columns:
         mode = X[col].mode()[0]
