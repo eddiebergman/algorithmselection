@@ -42,7 +42,8 @@ setuptools.setup(
         "test": [
             "pytest",
             "mypy",
-            "pylint"
+            "pylint",
+            "ipython"
         ],
     },
     test_suite="pytest",
