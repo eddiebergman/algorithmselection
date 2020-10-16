@@ -32,6 +32,11 @@ def process_openml_task(task: OpenMLTask) -> Tuple[ndarray, ndarray]:
         elif y.dtype == bool:
             y = y.astype('int')
 
+    # Process NA's
+    for col in X.columns:
+        mode = X[col].mode()[0]
+        X[col].fillna(mode, inplace=True)
+
     # Process Categorical features
     encoding_frames = []
     for col_name in list(X.columns[categorical_mask]):
