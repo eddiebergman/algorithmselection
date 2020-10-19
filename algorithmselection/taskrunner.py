@@ -35,7 +35,7 @@ def taskrunner(
     save_dir = os.path.abspath(save_dir)
 
     if not os.path.exists(save_dir):
-        raise RunTimeError(f'Please create {save_dir}')
+        raise RuntimeError(f'Please create {save_dir}')
 
     task_descriptions = config['tasks']
     for i, task_description in enumerate(task_descriptions):
