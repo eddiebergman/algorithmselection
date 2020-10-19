@@ -26,7 +26,7 @@ def process_openml_task(task: OpenMLTask) -> Tuple[ndarray, ndarray]:
     # Process labels
     if y is not None:
         if y.dtype == 'category' or y.dtype == object:
-            encoded_labels = LabelEncoder().fit_transform(y.values)
+            y = LabelEncoder().fit_transform(y.values)
             # y = pandas.Series(encoded_labels)
 
         elif y.dtype == bool:
