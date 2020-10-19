@@ -1,16 +1,34 @@
 import numpy as np
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
+from autosklearn.metrics import make_scorer
 from dask.distributed import Client
 
 from ..selector import Selector, register_selector
 from ..ensemble import Ensemble
 from ..model import ModelType
-from .base import AutoSklearnModelMixin
+from .base import AutoSklearnModel
 
+#TODO clean this up and make a configurable option
+#   Currently it is being passed in through the config
+def log_correct(y, pred):
+    single = np.any(y == pred).astype(int)
+    log_extra = np.log(np.sum(y == pred))
+    normalizer = 1 + np.log(pred.size)
+    return (single + log_extra) / normalizer
+
+learning_metrics = {
+    'log_correct' : make_scorer(
+        'log_correct',
+        log_correct,
+        optimum=1.0,
+        worst_possible_result=0.0,
+        greater_is_better=True
+    )
+}
 
 @register_selector
-class AutoSklearnClassifierSelector(AutoSklearnModelMixin, Selector):
+class AutoSklearnClassifierSelector(AutoSklearnModel, Selector):
     """
     Wrapper around autosklearn classifier for use as a Selector.
 
@@ -27,6 +45,12 @@ class AutoSklearnClassifierSelector(AutoSklearnModelMixin, Selector):
                         n_workers=kwargs['n_jobs'],
                         threads_per_worker=1,
                         dashboard_address=None)
+
+        if (metric_name := kwargs.get('metric', None)):
+            if (metric := learning_metrics.get(metric_name, None)):
+                kwargs.update({'metric': metric})
+            else:
+                raise NotImplementedError(f'{metric_name=} unknown')
         self.model = AutoSklearnClassifier(**kwargs, dask_client=client)
 
     def selections(self, X: np.ndarray) -> np.ndarray:
@@ -46,7 +70,7 @@ class AutoSklearnClassifierSelector(AutoSklearnModelMixin, Selector):
 
 
 @register_selector
-class AutoSklearnRegressorSelector(AutoSklearnModelMixin, Selector):
+class AutoSklearnRegressorSelector(AutoSklearnModel, Selector):
     """
     Wrapper around autosklearn regressor for use as a a Selctor.
 

@@ -10,7 +10,7 @@ from ..model import Model
 AutoSklearnModelTypes = Union[AutoSklearnClassifier, AutoSklearnRegressor]
 
 
-class AutoSklearnModelMixin(ABC, Model):
+class AutoSklearnModel(ABC, Model):
 
     def trained(self) -> bool:
         return self.autosklearn_model().automl_ is not None

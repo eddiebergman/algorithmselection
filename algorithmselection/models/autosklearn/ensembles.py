@@ -8,10 +8,10 @@ from dask.distributed import Client
 
 from ..ensemble import Ensemble, register_ensemble
 from ..model import ModelType
-from .base import AutoSklearnModelMixin
+from .base import AutoSklearnModel
 
 @register_ensemble
-class AutoSklearnClassifierEnsemble(AutoSklearnModelMixin, Ensemble):
+class AutoSklearnClassifierEnsemble(AutoSklearnModel, Ensemble):
     """
     Wrapper around an autosklearn model.
     """
@@ -42,7 +42,7 @@ class AutoSklearnClassifierEnsemble(AutoSklearnModelMixin, Ensemble):
         return cls._kind
 
 @register_ensemble
-class AutoSklearnRegressorEnsemble(AutoSklearnModelMixin, Ensemble):
+class AutoSklearnRegressorEnsemble(AutoSklearnModel, Ensemble):
     """
     Wrapper around an autosklearn model.
     """
