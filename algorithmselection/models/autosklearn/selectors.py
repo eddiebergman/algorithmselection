@@ -12,7 +12,7 @@ from .base import AutoSklearnModel
 #TODO clean this up and make a configurable option
 #   Currently it is being passed in through the config
 def log_correct(y, pred):
-    single = np.any(y == pred).astype(int)
+    single = np.any(y & pred).astype(int)
     log_extra = np.log(np.sum(y == pred))
     normalizer = 1 + np.log(pred.size)
     return (single + log_extra) / normalizer
